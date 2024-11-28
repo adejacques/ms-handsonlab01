@@ -97,6 +97,26 @@ You should see the following configuration in your trigger :
 
 ![alt text](image-2.png)
 
+### 🚀 Check the Event Grid Subscription in the Event Grid System Topic
+
+[TO REPLACE]
+
+<div class="task" data-title="Tasks">
+
+> Check the configuration of the Event Grid trigger:   
+>- Access the Event Subscription `xxx-xxx-xxx`. 
+>- xxx
+>- Make sure that the Event type is **Microsoft.Storage.BlobCreated**
+>- Check the URL corresponding to the Web Hook
+
+</div>
+
+You should see the following configurations in Event Grid Subscription :
+
+![alt text](image-8.png)
+
+![alt text](image-9.png)
+
 ### 🚀 Check the Webhook validation condition
 
 After the event is received, we add an action to parse the json event with the event grid schema. We can get the schema from [here](https://learn.microsoft.com/en-us/azure/event-grid/event-schema#event-schema). 
@@ -111,7 +131,7 @@ We add a condition step after, to check whether the event is a subscription Vali
           "Microsoft.EventGrid.SubscriptionValidationEvent"
         ]` 
 
-The reason we need to do this is to validate that our workflow is the correct subscriber to the events in the Storage Account. This is a security mechanism, to avoid untrusted subscribers to your storage account. 
+The reason we need to do this is to validate that our workflow is the correct subscriber to the events in the Storage Account. This is a security mechanism, to avoid untrusted subscribers to our Storage Account. 
 When we save the workflow for the first time, a subscription will be created in the storage account automatically with some default naming convention, but it will be in 'Creating' state. Until we do not validate this event, it will be in this state. 
 To validate the event, we are using the Response action: `Response Validation Webhook`.
 
@@ -142,14 +162,14 @@ You should see the following RBAC configuration in your Storage Account :
 
 ### 🚀 Retrieve file content
 
-To retrieve the content of the file we will upload in the container `input`, we are using the `Read blob content` action.
+To retrieve the content of the file we will upload in the container `input`, we are using the `Azure Blob Storage` connector and `Read blob content` action.
 
 <div class="task" data-title="Tasks">
 
-> Vérifier comment l'action Blob Storage est configurée: 
->- This is an info admonition.
->- This is an info admonition.
->- This is an info admonition.
+> Check the configuration of the `Read blob content` action:   
+>- Access the Logic App `xxx-xxx-xxx`. 
+>- Open the workflow `wf_object_from_sa_to_sb` and the action `Read blob content`.
+>- Make sure that the Resource Id corresponds to your Storage Account where the file will be uploaded and that the Event type is **Microsoft.Storage.BlobCreated**.
 
 </div>
 
@@ -159,66 +179,100 @@ You should see the following configuration in your action :
 
 ## Publish the message (10 min)
 
-### Pub/Sub integration pattern
+### Publish/Subscribe design pattern
 
-Rappel sur le pattern d'intégration utilisé => what, why, how
-Pub/Sub : Service Bus + Topic/Subscription
+The Publish/Subscribe (Pub/Sub) design pattern enables a decoupled communication model where publishers send messages to a central broker, and subscribers receive only the messages they are interested in, based on topics subscriptions. 
+This approach is well-suited for systems requiring loose coupling between components, such as event-driven architectures when an application needs to broadcast information to multiple consumers, particularly if they operate independently, use different technologies, or have varying availability and response time requirements.
 
-[Capture d'écran du pattern = si possible depuis site MS]
+You can find a detailed article which explains what is the Publisher-Subscriber design pattern and when to use it [following this link](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber).
+
+![alt text](image-6.png)
+
+Azure Service Bus is a good solution for implementing the Publish/Subscribe pattern as it provides robust messaging capabilities, including topic-based subscriptions, reliable message delivery, and support for diverse protocols and platforms. 
+Its built-in features, such as message filtering, dead-letter queues, and transactional processing, make it ideal for building scalable, decoupled, and fault-tolerant systems.
 
 ### 🚀 Check Logic App permission to access Service Bus
 
-Explain here why we need to grant permission to SB (Managed Identity). 
+The Logic App needs to access the Service Bus to publish the message (content of the file). Since we want to use Managed Identities to secure the connection between our Azure Resources, let's check how it is configured in the Service Bus.
 
 <div class="task" data-title="Tasks">
 
-> Vérifier que le RBAC est configuré dans le Service Bus. 
->- This is an info admonition.
->- This is an info admonition.
->- This is an info admonition.
+> Check that correct RBAC configuration is applied in the Service Bus: 
+>- Access the Service Bus `xxx-xxx-xxx`.
+>- Go to Access Control (IAM).
+>- Go to Role Assignment and check that Logic App `xxx-xxx-xxx` has the **Service Bus Data Receiver** and **Service Bus Data Receiver**.
 
 </div>
 
-[Capture d'écran RBAC Service Bus]
+You should see the following RBAC configuration in your Service Bus Namespace :
 
-### 🚀 Publish the message to Service Bus
+![alt text](image-7.png)
 
-Check action in LOA to publish the message in the Service Bus Topic.
+### 🚀 Check the action to Publish the message to Service Bus
+
+Next step is to publish the message (i.e. content of the file) in the Service Bus topic `xxx-xxx-xxx`.
+To do that, we are using the `Service Bus` connector and `Send message to a queue or topic` action.
 
 <div class="task" data-title="Tasks">
 
-> Vérifier comment l'action Publish Message to SB est configurée: 
->- This is an info admonition.
->- This is an info admonition.
->- This is an info admonition.
+> Check the configuration of the `Send message to a queue or topic` action:   
+>- Access the Logic App `xxx-xxx-xxx`. 
+>- Open the workflow `wf_object_from_sa_to_sb` and the action `Send message`.
+>- Make sure that Queue or Topic name correspons to `xxx-xxx-xxx` and that the Content section is filled with a variable corresponding to the content of the file from the previous step.
 
 </div>
 
-[Capture d'écran de l'action Service Bus]
+You should see the following configuration in your action :
+
+![alt text](image-10.png)
+
+At the end of this first section, we have a Logic App workflow that is triggered by an event when a new file is uploaded in the `input` container of our Storage Account, that reads the file content and publish it in a Service Bus topic.
+The next section will focus on the subscription to this message and its processing, before sending it to the target system. 
 
 ## Subscribe to the message (5 min)
 
-2-3 lignes sur la partie souscription au message
+Next step is to retrieve the message from the Service Bus in order to process it later. In the Pub/Sub pattern previously explained, this is the Subscription part.
+We will build a workflow that will be triggered when a new message is available in the dedicated Service Bus subscription, containing our message.
 
 ### 🚀 Configure the Service Bus trigger in Logic App
 
+In this step, will will configure the Logic App `Service Bus` connector and trigger `When messages are available in a topic`. 
+As the Service Bus connection configuration is already done, we will focus on the creation and configuration of the trigger itself.
+
 <div class="task" data-title="Tasks">
 
-> Expliquer comment configurer le trigger Service Bus: 
->- La connection existe déjà.
->- This is an info admonition.
->- This is an info admonition.
+> Create and configure the Service Bus trigger : 
+>- Access the Logic App `xxx-xxx-xxx`. 
+>- Open the workflow `wf_object_from_sb_to_cdb`.
+>- Click on the `Add a trigger` button.
+>- In the triggers list search for `Service Bus` and select the `When messages are available in a topic` trigger.
+>- In the Topic Name dropdown list, select the `xxx-xxx-xxx` topic. 
+>- In the Subscription Name dropdown list, select the `xxx-xxx-cdb` topic.
+>- Once everything is set, click on the Save button on the top left corner.
 
 </div>
 
-[Capture d'écran du trigger Service Bus]
+The trigger operation should look like this :
+
+![alt text](image-11.png)
 
 ## Transform the message (10 min)
 
 ### Message Transformation
-Expliquer les différentes facon de transformer un message, et que c'est commun dans l'intégration.
+
+Message transformation in orchestration workflows is essential to ensure compatibility between systems that may use different data formats, structures, or conventions. 
+Target systems often have specific requirements for how data should be presented, such as field naming, value types, or schema validation. 
+Transformations also help enrich messages by adding necessary data or filtering out unnecessary information, optimizing the payload for the target system. 
+This step ensures seamless integration, reduces errors, and improves the reliability of communication across disparate systems.
+
+In Logic Apps, you can transform messages using built-in connectors (e.g., JSON, XML, or flat file parsing), Liquid templates for complex JSON mapping, Data Mapper or Transform XML for complex XML mapping and Azure Functions or Inline Code for custom transformations. 
+Additionally, Logic Apps supports external tools like Azure API Management for preprocessing.
+[Follow this link](https://learn.microsoft.com/en-us/azure/logic-apps/create-maps-data-transformation-visual-studio-code) for more details about message transformation in Logic Apps.
 
 ### 🚀 Configure the transform action in Logic App
+
+Expliquer ce que l'on veut transformer dans le message.
+Expliquer ce que l'on va utiliser comme actions.
 
 <div class="task" data-title="Tasks">
 
@@ -229,24 +283,58 @@ Expliquer les différentes facon de transformer un message, et que c'est commun 
 
 </div>
 
-[Capture d'écran de l'action transform]
-
-## Store the message in Cosmos DB (10 min)
-
-### 🚀 Retrieve Cosmos DB Shared Access Key
+XXXX
+![alt text](image-12.png)
 
 <div class="task" data-title="Tasks">
 
-> Expliquer comment récupérer la Shared Access Key depuis CosmosDB : 
->- xxx
->- xxx
->- xxx
+> Expliquer comment configurer l'action transform XML : 
+>- Transform JSON to XML.
+>- Transform XML using XSLT.
+>- Transform XML to JSON.
 
 </div>
 
-[Capture d'écran de la shared access key dans cosmosdb]
+XXXX
+![alt text](image-13.png)
 
-### 🚀 Configure the action in Logic App
+<div class="task" data-title="Tasks">
+
+> Expliquer comment configurer l'action transform XML : 
+>- Transform JSON to XML.
+>- Transform XML using XSLT.
+>- Transform XML to JSON.
+
+</div>
+
+XXXX
+![alt text](image-14.png)
+
+## Store the message in Cosmos DB (10 min)
+
+Once the message has been transformed to match the format of the target system, we want to send it to our target system, in our case a container in CosmosDB, so that it can be processed later.
+
+### 🚀 Retrieve Cosmos DB Shared Access Key
+
+To use the Cosmos DB connector in our Logic App workflow and write to the Cosmos DB container, you can use the Shared Access Key for authentication. 
+This key grants the Logic App access to the Cosmos DB account and allows it to perform the required operations.
+We will now see how to retrieve this key for integration into our configuration.
+
+<div class="task" data-title="Tasks">
+
+> Retrieve the Cosmos DB Shared Access Key:
+
+>- Navigate to the Cosmos DB account `xxx-xxx-xxx`.
+>- In the left-hand menu, click on Keys under the Settings section.
+>- In the Keys section, locate the Primary Key.
+>- Copy the Primary Key by clicking the copy icon next to it.
+>- The key is now ready to be used in your Logic App configuration.
+
+</div>
+
+![alt text](image-17.png)
+
+### 🚀 Configure the write to CosmosDB action in Logic App
 
 <div class="task" data-title="Tasks">
 
@@ -257,9 +345,15 @@ Expliquer les différentes facon de transformer un message, et que c'est commun 
 
 </div>
 
-[Capture d'écran de l'action dans la Logic App]
+XXXX
 
-## Store the message in Storage Account (5 min)
+![alt text](image-15.png)
+
+XXXX
+
+![alt text](image-16.png)
+
+## Archive the message in Storage Account (5 min)
 
 ### 🚀 Configure the action in Logic App
 
