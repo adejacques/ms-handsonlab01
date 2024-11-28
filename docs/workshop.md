@@ -271,43 +271,90 @@ Additionally, Logic Apps supports external tools like Azure API Management for p
 
 ### 🚀 Configure the transform action in Logic App
 
-Expliquer ce que l'on veut transformer dans le message.
-Expliquer ce que l'on va utiliser comme actions.
+We need to transform the initial message to a simplified format that is expected by the target system. 
+By consolidating passenger names into a list and focusing on key flight and payment details, we make the data more compact and easier for the target system to process. 
+
+This is the message expected by the target system: 
+`
+{
+    "transformedBooking": {
+        "bookingId": "B12345678",
+        "passengerNames": {
+            "name": [
+                "John Doe",
+                "Jane Doe"
+            ]
+        },
+        "flightDetails": {
+            "flightNumber": "UA123",
+            "departure": "SFO",
+            "arrival": "JFK",
+            "departureDate": "2022-02-15T08:00:00Z"
+        },
+        "payment": {
+            "cardType": "Visa",
+            "amountPaid": "500"
+        }
+    }
+}
+`
+We need to transform the message from JSON to XML because XSLT is designed to operate on XML data. 
+Since XSLT requires XML as input to perform transformations, converting the JSON message into XML format allows us to leverage XSLTs powerful capabilities to manipulate and restructure the data as needed for the target system.
+
+We will use a `Compose` action with a function to transform the JSON message into an XML format.
 
 <div class="task" data-title="Tasks">
 
-> Expliquer comment configurer l'action transform XML : 
->- Transform JSON to XML.
->- Transform XML using XSLT.
->- Transform XML to JSON.
+> Configure a `Compose` action with a function to transform JSON into XML:
+>- Open the Logic App `xxx-xxx-xxx`.
+>- Access the workflow `xxx-xxx-xxx`.
+>- Click on the `+` button, select `Add an action` and search for `Compose` from the list of actions.
+>- In the Inputs field of the Compose action, enter the following function: `xml(json(triggerBody()?['contentData']))`.
+>- Rename the action `JSON to XML`
+>- Once everything is set, click on the Save button at the top left corner.
 
 </div>
 
-XXXX
+The Compose action should look like this :
+
 ![alt text](image-12.png)
 
+We will then use a `Transform XML` action to transform the XML message into the desired output.
+
 <div class="task" data-title="Tasks">
 
-> Expliquer comment configurer l'action transform XML : 
->- Transform JSON to XML.
->- Transform XML using XSLT.
->- Transform XML to JSON.
+> Configure a `Transform XML` action using an XSLT file:
+>- Open the Logic App `xxx-xxx-xxx`.
+>- Access the workflow `xxx-xxx-xxx`.
+>- Click on the `+` button, select `Add an action` and search for `Transform XML` from the list of actions.
+>- In the Content field, enter the following text: `outputs('JSON_to_XML')`.
+>- In the Map Source dropdown list, select `LogicApp`.
+>- In the Map Name dropdown list, select `transformation_flightbooking`.
+>- Rename the action `Transform XML`
+>- Once everything is set, click on the Save button at the top left corner.
 
 </div>
 
-XXXX
+The Transform XML action should look like this :
+
 ![alt text](image-13.png)
 
+We will now use a `Compose` action with a function to transform the XML transformed message into a JSON format before sending it to the target.
+
 <div class="task" data-title="Tasks">
 
-> Expliquer comment configurer l'action transform XML : 
->- Transform JSON to XML.
->- Transform XML using XSLT.
->- Transform XML to JSON.
+> Configure a `Compose` action with a function to transform JSON into XML:
+>- Open the Logic App `xxx-xxx-xxx`.
+>- Access the workflow `xxx-xxx-xxx`.
+>- Click on the `+` button, select `Add an action` and search for `Compose` from the list of actions.
+>- In the Inputs field of the Compose action, enter the following function: `json(body('Transform_XML'))`.
+>- Rename the action `XML to JSON`
+>- Once everything is set, click on the Save button at the top left corner.
 
 </div>
 
-XXXX
+The Compose action should look like this :
+
 ![alt text](image-14.png)
 
 ## Store the message in Cosmos DB (10 min)
