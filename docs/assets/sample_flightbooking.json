@@ -1,0 +1,61 @@
+{
+  "booking": {
+		  "bookingId": "B12345678",
+		  "bookingDate": "2022-02-08T12:00:00Z",
+		  "passengers": [
+			{
+			  "firstName": "John",
+			  "lastName": "Doe",
+			  "email": "johndoe@example.com",
+			  "dob": "1990-01-01",
+			  "gender": "M",
+			  "address": {
+				"street": "123 Main St",
+				"city": "Anytown",
+				"state": "CA",
+				"postalCode": "12345",
+				"country": "USA"
+			  },
+			  "phoneNumber": "+1 555-555-5555"
+			},
+			{
+			  "firstName": "Jane",
+			  "lastName": "Doe",
+			  "email": "janedoe@example.com",
+			  "dob": "1992-03-15",
+			  "gender": "F",
+			  "address": {
+				"street": "456 Second St",
+				"city": "Anycity",
+				"state": "CA",
+				"postalCode": "67890",
+				"country": "USA"
+			  },
+			  "phoneNumber": "+1 555-555-5556"
+			}
+		  ],
+		  "flight": {
+			"flightNumber": "UA123",
+			"origin": "SFO",
+			"destination": "JFK",
+			"departureDate": "2022-02-15T08:00:00Z",
+			"arrivalDate": "2022-02-15T16:00:00Z",
+			"airline": "United Airlines",
+			"fareClass": "Economy",
+			"farePrice": 250.00
+		  },
+		  "payment": {
+			"cardType": "Visa",
+			"cardNumber": "**** **** **** 1234",
+			"expirationDate": "03/24",
+			"billingAddress": {
+			  "street": "789 Third St",
+			  "city": "Anyvillage",
+			  "state": "CA",
+			  "postalCode": "24680",
+			  "country": "USA"
+			},
+			"totalPrice": 500.00
+		  }
+	}
+}

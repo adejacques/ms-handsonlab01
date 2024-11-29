@@ -82,7 +82,8 @@ Azure Logic Apps offers different components which can be used to define the ste
 - **Controls** : Switch, Loop, Condition, Scope are used to control the flow of the steps composing the actual logic of the workflow.
 - **Connectors** : Connectors are used to connect to different first of third party services and applications. These connectors abstract the complexities of interacting with these services by defining their required and optional inputs as well as deserializing their outputs to dynamic objects usable in the rest of the flow steps.
 
-Since we want the Logic App to be triggered when an event is pushed from the Event Grid System Topic, we will be using the Event Grid Built-In connector available in Logic App. It comes with one action "When a resource event occurs", that is triggered when an Azure Event Grid subscription fires an event.
+Since we want the Logic App to be triggered when an event is pushed from the Event Grid System Topic, we will be using the Event Grid Built-In connector available in Logic App. 
+It comes with one action "When a resource event occurs", that is triggered when an Azure Event Grid subscription fires an event.
 
 <div class="task" data-title="Tasks">
 
@@ -97,23 +98,32 @@ You should see the following configuration in your trigger :
 
 ![alt text](image-2.png)
 
-### 🚀 Check the Event Grid Subscription in the Event Grid System Topic
+### 🚀 Check the Event Grid subscription in the Event Grid System Topic
 
-[TO REPLACE]
+When we save the workflow for the first time, an Event Grid subscription will be created in the storage account automatically with some default naming convention, and it will be in 'Creating' state.
+We will see in the next step why and how to validate the subscription.
+In the meatime, let's have a look to the Event Grid subscription.
 
 <div class="task" data-title="Tasks">
 
-> Check the configuration of the Event Grid trigger:   
->- Access the Event Subscription `xxx-xxx-xxx`. 
->- xxx
->- Make sure that the Event type is **Microsoft.Storage.BlobCreated**
->- Check the URL corresponding to the Web Hook
+> Check the configuration of the Event Grid subscription in the Storage Account:   
+>- Navigate to the Storage Account `xxx-xxx-xxx`.
+>- In the left-hand menu, click on Events.
 
 </div>
 
 You should see the following configurations in Event Grid Subscription :
 
 ![alt text](image-8.png)
+
+<div class="task" data-title="Tasks">
+
+> Check the configuration of the Event Grid subscription in the Storage Account:   
+>- Click on the name of the Subscription on the bottom of the page.
+
+</div>
+
+You should see the following configurations in Event Grid Subscription :
 
 ![alt text](image-9.png)
 
@@ -131,15 +141,15 @@ We add a condition step after, to check whether the event is a subscription Vali
           "Microsoft.EventGrid.SubscriptionValidationEvent"
         ]` 
 
-The reason we need to do this is to validate that our workflow is the correct subscriber to the events in the Storage Account. This is a security mechanism, to avoid untrusted subscribers to our Storage Account. 
-When we save the workflow for the first time, a subscription will be created in the storage account automatically with some default naming convention, but it will be in 'Creating' state. Until we do not validate this event, it will be in this state. 
+The reason we need to do this is to validate that our workflow is the correct subscriber to the events in the Storage Account. This is a security mechanism, to avoid untrusted subscribers to our Storage Account.  
+Until we do not validate this event, the subscription will remain in the 'Creating' state. 
 To validate the event, we are using the Response action: `Response Validation Webhook`.
 
 You should see the following configuration in your trigger :
 
 ![alt text](image-4.png)
 
-## Process the event (10 min)
+## Process the event (5 min)
 
 ### 🚀 Check Logic App permission to access Storage Account
 
@@ -360,6 +370,8 @@ The Compose action should look like this :
 ## Store the message in Cosmos DB (10 min)
 
 Once the message has been transformed to match the format of the target system, we want to send it to our target system, in our case a container in CosmosDB, so that it can be processed later.
+Azure Cosmos DB is a fully managed NoSQL database which offers Geo-redundancy and multi-region write capabilities. 
+It currently supports NoSQL, MongoDB, Cassandra, Gremlin, Table and PostgreSQL APIs and offers a serverless option which is perfect for our use case.
 
 ### 🚀 Retrieve Cosmos DB Shared Access Key
 
@@ -381,38 +393,96 @@ We will now see how to retrieve this key for integration into our configuration.
 
 ![alt text](image-17.png)
 
-### 🚀 Configure the write to CosmosDB action in Logic App
+### 🚀 Store data to Cosmos DB
+
+Now we can add the last step of the Logic App flow that will store the transformed message in the Cosmos DB database using the Create or update document V3 operation. 
+First, we need to configure the connection to our CosmosDB account. 
 
 <div class="task" data-title="Tasks">
 
-> Expliquer comment configurer l'action create or update item in cdb : 
->- xxx
->- xxx
->- xxx
+> Configure the connection to CosmosDB for using the `Create or update document (V3)` connector:
+>- Open the Logic App `xxx-xxx-xxx`.
+>- Access the workflow `xxx-xxx-xxx`.
+>- Click on the `+` button, select `Add an action` and search for `Cosmos DB`. 
+>- Select `Create or update document (V3)`
+>- Set the connection with your Cosmos Db Instance: Select the Access Key authentication type and set the primary key that you retrieved in the previous step
 
 </div>
 
-XXXX
+The configuration should look like that:
+
+![alt text](image-18.png)
+
+Once the connection is set-up, we can configure the action.
+Before creating the document in Cosmos DB, we need to add a unique `id` property to the document, as it is mandatory. 
+We will use a `Compose` action to generate a unique identifier and append an `id` property to our message. 
+
+<div class="task" data-title="Tasks">
+
+> Configure a `Compose` action to XXX:
+>- Click on the `+` button, select `Add an action` and search for `Compose`. 
+>- In the Inputs textbox, click on the `fx` icon and enter the following text : `addProperty(outputs('XML_to_JSON'), 'id', guid())`
+>- Rename the action `Append id property and generate UUID`
+>- Once everything is set, click on the Save button on the top left corner.
+
+</div>
+
+The Compose action should look like this :
 
 ![alt text](image-15.png)
 
-XXXX
-
-![alt text](image-16.png)
-
-## Archive the message in Storage Account (5 min)
-
-### 🚀 Configure the action in Logic App
-
-Dire que le trigger est le même que dans l'autre logic app.
+We are now ready to send our message to our CosmosDB account.  
+To do so, we need to configure our `Create or update document (V3)` connector.
 
 <div class="task" data-title="Tasks">
 
-> Regarder l'action qui écrit dans le blob storage : 
->- xxx
->- xxx
->- xxx
+> Configure the `Create or update document (V3)` action to create a new document in CosmosDB:
+>- In the Database Id textbox, enter the following text : `handsonlab`
+>- In the Container Id textbox, enter the following text : `items`
+>- In the Item textbox, click on the `lightning` button and select `Outputs` from the previous action `Append id property and generate UUID`
+>- Once everything is set, click on the Save button on the top left corner.
 
 </div>
 
-[Capture d'écran de l'action dans la Logic App]
+The action should look like this :
+
+![alt text](image-16.png)
+
+## Trigger the workflow (5 min)
+
+We are now ready to test our workflow.
+
+### 🚀 Check the message stored in the CosmosDB
+
+First, let's upload a new file to the `xxx-xxx-xxx` container of the `xxx-xxx-xxx` Storage Account to simulate a booking. 
+You can download the JSON file from here: [Download file](assets/sample_flightbooking.json)
+
+<div class="task" data-title="Tasks">
+
+> Upload the file in the Storage Account and check the message in CosmosDB : 
+>- Navigate to the Storage Account `xxx-xxx-xxx`.
+>- In the left-hand menu, click on `Storage browser` and select `Blob containers`.
+>- Click on the `input` container.
+>- From the top-menu bar, click on the `Upload` button, click on `Browse for files` and select the `sample_flightbooking.json` file from your Storage Explorer.
+>- Click on the `Upload` button below.
+
+</div>
+
+You should see your file in the container: 
+
+![alt text](image-19.png)
+
+Then, let's XXX
+
+<div class="task" data-title="Tasks">
+
+>- Navigate to the Cosmos DB account `xxx-xxx-xxx`.
+>- In the left-hand menu, click on `Data explorer` and click on `handsonlab` to open the database
+>- Click on `bookings` to open the container
+>- Click on `Items` and select the first line
+
+</div>
+
+You should see your transformed message in the `bookings` container: 
+
+![alt text](image-19.png)
