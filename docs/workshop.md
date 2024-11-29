@@ -1,8 +1,8 @@
 ---
 published: false                        # Optional. Set to true to publish the workshop (default: false)
 type: workshop                          # Required.
-title: Lab 1 : Transform a JSON file    # Required. Full title of the workshop
-short_title: Lab 1 : Transform a JSON file                # Optional. Short title displayed in the header
+title: 'Lab 1 : Process and Transform a file'    # Required. Full title of the workshop
+short_title: 'Lab 1 : Process and Transform a file'                # Optional. Short title displayed in the header
 description: Use the Pub/Sub integration patterns to move and transform a file # Required.
 level: beginner                         # Required. Can be 'beginner', 'intermediate' or 'advanced'
 authors:                                # Required. You can add as many authors as needed      
@@ -23,11 +23,11 @@ tags: logicapp, eventgrid, servicebus, storageaccount, cosmosdb # Required. Tags
 #   - Section 2 title
 ---
 
-# 🚀 Lab 1 : Transform a JSON file (1 hour)
+# 🚀 Lab 1 : Process and Transform a file (1 hour)
 
 For this first lab, you will focus on the following scope :
 
-![alt text](image.png)
+![alt text](assets/image.png)
 
 ## Detect a file upload event (15 min)
 
@@ -76,7 +76,7 @@ The Logic App needs to access the Event Grid service through the Storage Account
 
 You should see the following RBAC configuration in your Storage Account :
 
-![alt text](image-1.png)
+![alt text](assets/image-1.png)
 
 ### 🚀 Check the Event Grid trigger in Logic App
 
@@ -105,7 +105,7 @@ It comes with one action "When a resource event occurs", that is triggered when 
 
 You should see the following configuration in your trigger :
 
-![alt text](image-2.png)
+![alt text](assets/image-2.png)
 
 ### 🚀 Check the Event Grid subscription in the Event Grid System Topic
 
@@ -123,7 +123,7 @@ In the meatime, let's have a look to the Event Grid subscription.
 
 You should see the following configurations in Event Grid Subscription :
 
-![alt text](image-8.png)
+![alt text](assets/image-8.png)
 
 <div class="task" data-title="Tasks">
 
@@ -134,7 +134,7 @@ You should see the following configurations in Event Grid Subscription :
 
 You should see the following configurations in Event Grid Subscription :
 
-![alt text](image-9.png)
+![alt text](assets/image-9.png)
 
 ### 🚀 Check the Webhook validation condition
 
@@ -156,7 +156,7 @@ To validate the event, we are using the Response action: `Response Validation We
 
 You should see the following configuration in your trigger :
 
-![alt text](image-4.png)
+![alt text](assets/image-4.png)
 
 ## Process the event (5 min)
 
@@ -178,7 +178,7 @@ Since we want to use Managed Identities to secure the connection between our Azu
 
 You should see the following RBAC configuration in your Storage Account :
 
-![alt text](image-3.png)
+![alt text](assets/image-3.png)
 
 ### 🚀 Retrieve file content
 
@@ -198,7 +198,7 @@ To retrieve the content of the file that will be uploaded in the `input` contain
 
 You should see the following configuration in your action :
 
-![alt text](image-5.png)
+![alt text](assets/image-5.png)
 
 ## Publish the message (10 min)
 
@@ -213,7 +213,7 @@ This approach is well-suited for systems requiring loose coupling between compon
 
 </div>
 
-![alt text](image-6.png)
+![alt text](assets/image-6.png)
 
 Azure Service Bus is a good solution for implementing the Publish/Subscribe pattern as it provides robust messaging capabilities, including topic-based subscriptions, reliable message delivery, and support for diverse protocols and platforms. 
 Its built-in features, such as message filtering, dead-letter queues, and transactional processing, make it ideal for building scalable, decoupled, and fault-tolerant systems.
@@ -233,7 +233,7 @@ The Logic App needs to access the Service Bus to publish the message (content of
 
 You should see the following RBAC configuration in your Service Bus Namespace :
 
-![alt text](image-7.png)
+![alt text](assets/image-7.png)
 
 ### 🚀 Check the action to Publish the message to Service Bus
 
@@ -254,7 +254,7 @@ To do that, we are using the `Service Bus` connector and `Send message to a queu
 
 You should see the following configuration in your action :
 
-![alt text](image-10.png)
+![alt text](assets/image-10.png)
 
 At the end of this first section, we have a Logic App workflow that is triggered by an event when a new file is uploaded in the `input` container of our Storage Account, that reads the file content and publish it in a Service Bus topic.
 The next section will focus on the subscription to this message and its processing, before sending it to the target system. 
@@ -286,7 +286,7 @@ As the Service Bus connection configuration is already done, we will focus on th
 
 The trigger operation should look like this :
 
-![alt text](image-11.png)
+![alt text](assets/image-11.png)
 
 ## Transform the message (10 min)
 
@@ -351,7 +351,7 @@ We will use a `Compose` action with a function to transform the JSON message int
 
 The Compose action should look like this :
 
-![alt text](image-12.png)
+![alt text](assets/image-12.png)
 
 We will then use a `Transform XML` action to transform the XML message into the desired output.
 
@@ -369,7 +369,7 @@ We will then use a `Transform XML` action to transform the XML message into the 
 
 The Transform XML action should look like this :
 
-![alt text](image-13.png)
+![alt text](assets/image-13.png)
 
 We will now use a `Compose` action with a function to transform the XML transformed message into a JSON format before sending it to the target.
 
@@ -385,7 +385,7 @@ We will now use a `Compose` action with a function to transform the XML transfor
 
 The Compose action should look like this :
 
-![alt text](image-14.png)
+![alt text](assets/image-14.png)
 
 ## Store the message in Cosmos DB (10 min)
 
@@ -411,7 +411,7 @@ We will now see how to retrieve this key for integration into our configuration.
 
 </div>
 
-![alt text](image-17.png)
+![alt text](assets/image-17.png)
 
 ### 🚀 Store data to Cosmos DB
 
@@ -433,7 +433,7 @@ First, we need to configure the connection to our CosmosDB account.
 
 The configuration should look like that:
 
-![alt text](image-18.png)
+![alt text](assets/image-18.png)
 
 Once the connection is set-up, we can configure the action.
 Before creating the document in Cosmos DB, we need to add a unique `id` property to the document, as it is mandatory. 
@@ -441,7 +441,7 @@ We will use a `Compose` action to generate a unique identifier and append an `id
 
 <div class="task" data-title="Tasks">
 
-> Configure a `Compose` action to XXX:
+> Configure a `Compose` action to generate a UUID and append the id property:
 >- Click on the `+` button, select `Add an action` and search for `Compose`. 
 >- In the Inputs textbox, click on the `fx` icon and enter the following text : `addProperty(outputs('XML_to_JSON'), 'id', guid())`
 >- Rename the action `Append id property and generate UUID`
@@ -451,7 +451,7 @@ We will use a `Compose` action to generate a unique identifier and append an `id
 
 The Compose action should look like this :
 
-![alt text](image-15.png)
+![alt text](assets/image-15.png)
 
 We are now ready to send our message to our CosmosDB account.  
 To do so, we need to configure our `Create or update document (V3)` connector.
@@ -468,7 +468,7 @@ To do so, we need to configure our `Create or update document (V3)` connector.
 
 The action should look like this :
 
-![alt text](image-16.png)
+![alt text](assets/image-16.png)
 
 ## Trigger the workflow (5 min)
 
@@ -492,9 +492,9 @@ You can download the JSON file from here: [Download file](assets/sample_flightbo
 
 You should see your file in the container: 
 
-![alt text](image-19.png)
+![alt text](assets/image-19.png)
 
-Then, let's XXX
+Finally, let's check if our message is stored in our CosmosDB container.
 
 <div class="task" data-title="Tasks">
 
@@ -508,4 +508,4 @@ Then, let's XXX
 
 You should see your transformed message in the `flightbookings` container: 
 
-![alt text](image-19.png)
+![alt text](assets/image-19.png)
