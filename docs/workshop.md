@@ -227,7 +227,7 @@ The Logic App needs to access the Service Bus to publish the message (content of
 > Check that correct RBAC configuration is applied in the Service Bus: 
 >- Navigate to the Service Bus `sbhandsonlabinoday01`.
 >- In the left-hand menu, click on `Access Control (IAM)`.
->- From the top-menu bar, click on Role Assignment and check that Logic App `loahandsonlabinoday01` has the **Service Bus Data Receiver** and **Service Bus Data Receiver** roles.
+>- From the top-menu bar, click on Role Assignment and check that Logic App `loahandsonlabinoday01` has the **Service Bus Data Receiver** and **Service Bus Data Sender** roles.
 
 </div>
 
@@ -507,4 +507,4 @@ Finally, let's check if our message is stored in our CosmosDB container.
 
 You should see your transformed message in the `flightbookings` container: 
 
-![alt text](assets/image-19.png)
+![alt text](assets/image-20.png)
