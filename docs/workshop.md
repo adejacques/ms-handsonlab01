@@ -402,7 +402,6 @@ We will now see how to retrieve this key for integration into our configuration.
 <div class="task" data-title="Tasks">
 
 > Retrieve the Cosmos DB Shared Access Key:
-
 >- Navigate to the Cosmos DB account `cdbhandsonlabinoday01`.
 >- In the left-hand menu, click on Keys under the Settings section.
 >- In the Keys section, locate the Primary Key.
@@ -477,7 +476,7 @@ We are now ready to test our workflow.
 ### 🚀 Check the message stored in the CosmosDB
 
 First, let's upload a new file to the `flightbookings` container of the `cdbhandsonlabinoday01` Storage Account to simulate a booking. 
-You can download the JSON file from here: [Download file](assets/sample_flightbooking.json)
+You can download the JSON file from here: [Download sample JSON file](assets/sample_flightbooking.json)
 
 <div class="task" data-title="Tasks">
 
