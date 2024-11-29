@@ -35,7 +35,11 @@ For this first lab, you will focus on the following scope :
 
 Managed Identities in Azure allow resources to authenticate securely to other Azure services. This feature eliminates the need to manage secrets or keys, reducing the risk of accidental exposure and simplifying maintenance. By enabling seamless and secure communication between resources, Managed Identities promote a stronger security model that relies on Azure's identity platform for authentication. 
 
-You can find a detailed article which explains what are managed identities for Azure resources and how to use them [following this link](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview).
+<div class="info" data-title="Note">
+
+> You can find a detailed article which explains what are managed identities for Azure resources and how to use them [following this link](https://learn.microsoft.com/en-us/entra/identity/managed-identities-azure-resources/overview).
+
+</div>
 
 ### Event Services
 
@@ -55,16 +59,18 @@ Event Grid is an event broker that you can use to integrate applications while s
 
 ### 🚀 Check Logic App permission to access Event Grid
 
-Event Grid enables event-driven automation by reacting to changes in Azure resources, such as triggering workflows or functions when a blob is uploaded to Azure Blob Storage. This simplifies integration and real-time processing across services without constant polling. You will use it to trigger the Logic App workflow `xxx-xxx-xxx` when a blob is uploaded in the `input` container of the Storage Account.
+Event Grid enables event-driven automation by reacting to changes in Azure resources, such as triggering workflows or functions when a blob is uploaded to Azure Blob Storage. 
+This simplifies integration and real-time processing across services without constant polling. 
+You will use it to trigger the Logic App workflow `wf_flightbooking_from_sa_to_sb` when a blob is uploaded in the `input` container of the Storage Account.
 
 The Logic App needs to access the Event Grid service through the Storage Account as it will create an Event Grid System Topic when the Event Grid trigger connector is created. Since we want to use Managed Identities to secure the connection between our Azure Resources, let's check how it is configured in the Storage Account.
 
 <div class="task" data-title="Tasks">
 
 > Check that correct RBAC configuration is applied in the Storage Account: 
->- Access the Storage Account `xxx-xxx-xxx`.
->- Go to Access Control (IAM).
->- Go to Role Assignment and check that Logic App `xxx-xxx-xxx` has the **Event Grid Contributor** role.
+>- Navigate to the Storage Account `sahandsonlabinoday01`.
+>- In the left-hand menu, click on `Access Control (IAM)`.
+>- From the top-menu bar, click on Role Assignment and check that Logic App `loahandsonlabinoday01` has the **Event Grid Contributor** role.
 
 </div>
 
@@ -74,7 +80,7 @@ You should see the following RBAC configuration in your Storage Account :
 
 ### 🚀 Check the Event Grid trigger in Logic App
 
-Next step is to actually trigger the Logic App `xxx-xxx-xxx` based on the event raised by your Event Grid System Topic when a file is uploaded to the `input` container.
+Next step is to actually trigger the Logic App `loahandsonlabinoday01` based on the event raised by your Event Grid System Topic when a file is uploaded to the `input` container.
 
 Azure Logic Apps offers different components which can be used to define the steps of a flow as a chain of actions and controls. Here are the main ones :
 
@@ -88,8 +94,11 @@ It comes with one action "When a resource event occurs", that is triggered when 
 <div class="task" data-title="Tasks">
 
 > Check the configuration of the Event Grid trigger:   
->- Access the Logic App `xxx-xxx-xxx`. 
->- Open the workflow `wf_object_from_sa_to_sb` and the first trigger `When a resource event occurs`.
+>- Navigate to the Logic App `loahandsonlabinoday01`. 
+>- In the left-hand menu, click on `Workflows` from the `Workflows` section.
+>- Open the workflow `wf_flightbooking_from_sa_to_sb`.
+>- In the left-hand menu, click on `Designer` from the `Developer` section.
+>- Click on the trigger `When a resource event occurs`
 >- Make sure that the Resource Id corresponds to your Storage Account where the file will be uploaded and that the Event type is **Microsoft.Storage.BlobCreated**
 
 </div>
@@ -100,14 +109,14 @@ You should see the following configuration in your trigger :
 
 ### 🚀 Check the Event Grid subscription in the Event Grid System Topic
 
-When we save the workflow for the first time, an Event Grid subscription will be created in the storage account automatically with some default naming convention, and it will be in 'Creating' state.
+When we save the workflow for the first time, an Event Grid subscription will be created in the Storage Account automatically with some default naming convention, and it will be in 'Creating' state.
 We will see in the next step why and how to validate the subscription.
 In the meatime, let's have a look to the Event Grid subscription.
 
 <div class="task" data-title="Tasks">
 
 > Check the configuration of the Event Grid subscription in the Storage Account:   
->- Navigate to the Storage Account `xxx-xxx-xxx`.
+>- Navigate to the Storage Account `sahandsonlabinoday01`.
 >- In the left-hand menu, click on Events.
 
 </div>
@@ -153,16 +162,17 @@ You should see the following configuration in your trigger :
 
 ### 🚀 Check Logic App permission to access Storage Account
 
-The Azure storage account is used to store data objects, including blobs, file shares, queues, tables, and disks. It is used to store the sample Json file inside an `input` container.
+The Storage Account is used to store data objects, including blobs, file shares, queues, tables, and disks. In our lab, it is used to store the sample flight booking JSON file inside an `input` container.
 
-The Logic App needs to access the Storage Account to retrieve the sample Json file, and for the Event Grid trigger connector to list the available Storage Accounts in the Subscription. Since we want to use Managed Identities to secure the connection between our Azure Resources, let's check how it is configured in the Storage Account.
+The Logic App needs to access the Storage Account to retrieve the JSON file, and for the Event Grid trigger connector to list the available Storage Accounts in the Subscription. 
+Since we want to use Managed Identities to secure the connection between our Azure Resources, let's check how it is configured in the Storage Account.
 
 <div class="task" data-title="Tasks">
 
 > Check that correct RBAC configuration is applied in the Storage Account: 
->- Access the Storage Account `xxx-xxx-xxx`.
->- Go to Access Control (IAM).
->- Go to Role Assignment and check that Logic App `xxx-xxx-xxx` has the **Storage Blob Data Contributor**.
+>- Navigate to the Storage Account `sahandsonlabinoday01`.
+>- In the left-hand menu, click on `Access Control (IAM)`.
+>- From the top-menu bar, click on Role Assignment and check that Logic App `loahandsonlabinoday01` has the **Storage Blob Data Contributor** role.
 
 </div>
 
@@ -172,14 +182,17 @@ You should see the following RBAC configuration in your Storage Account :
 
 ### 🚀 Retrieve file content
 
-To retrieve the content of the file we will upload in the container `input`, we are using the `Azure Blob Storage` connector and `Read blob content` action.
+To retrieve the content of the file that will be uploaded in the `input` container, we are using the `Azure Blob Storage` connector and `Read blob content` action.
 
 <div class="task" data-title="Tasks">
 
 > Check the configuration of the `Read blob content` action:   
->- Access the Logic App `xxx-xxx-xxx`. 
->- Open the workflow `wf_object_from_sa_to_sb` and the action `Read blob content`.
->- Make sure that the Resource Id corresponds to your Storage Account where the file will be uploaded and that the Event type is **Microsoft.Storage.BlobCreated**.
+>- Navigate to the Logic App `loahandsonlabinoday01`. 
+>- In the left-hand menu, click on `Workflows` from the `Workflows` section.
+>- Open the workflow `wf_flightbooking_from_sa_to_sb`.
+>- In the left-hand menu, click on `Designer` from the `Developer` section.
+>- Click on the action `Read blob content`.
+>- Make sure that the Container Name is set to `input` and that the Blob Name is set to `last(split(items('For_each')['subject'], '/'))`.
 
 </div>
 
@@ -192,9 +205,13 @@ You should see the following configuration in your action :
 ### Publish/Subscribe design pattern
 
 The Publish/Subscribe (Pub/Sub) design pattern enables a decoupled communication model where publishers send messages to a central broker, and subscribers receive only the messages they are interested in, based on topics subscriptions. 
-This approach is well-suited for systems requiring loose coupling between components, such as event-driven architectures when an application needs to broadcast information to multiple consumers, particularly if they operate independently, use different technologies, or have varying availability and response time requirements.
+This approach is well-suited for systems requiring loose coupling between components, such as event-driven architectures, when an application needs to broadcast information to multiple consumers, particularly if they operate independently, use different technologies, or have varying availability and response time requirements.
 
-You can find a detailed article which explains what is the Publisher-Subscriber design pattern and when to use it [following this link](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber).
+<div class="info" data-title="Note">
+
+> You can find a detailed article which explains what is the Publisher-Subscriber design pattern and when to use it [following this link](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber).
+
+</div>
 
 ![alt text](image-6.png)
 
@@ -208,9 +225,9 @@ The Logic App needs to access the Service Bus to publish the message (content of
 <div class="task" data-title="Tasks">
 
 > Check that correct RBAC configuration is applied in the Service Bus: 
->- Access the Service Bus `xxx-xxx-xxx`.
->- Go to Access Control (IAM).
->- Go to Role Assignment and check that Logic App `xxx-xxx-xxx` has the **Service Bus Data Receiver** and **Service Bus Data Receiver**.
+>- Navigate to the Service Bus `sbhandsonlabinoday01`.
+>- In the left-hand menu, click on `Access Control (IAM)`.
+>- From the top-menu bar, click on Role Assignment and check that Logic App `loahandsonlabinoday01` has the **Service Bus Data Receiver** and **Service Bus Data Receiver** roles.
 
 </div>
 
@@ -220,15 +237,18 @@ You should see the following RBAC configuration in your Service Bus Namespace :
 
 ### 🚀 Check the action to Publish the message to Service Bus
 
-Next step is to publish the message (i.e. content of the file) in the Service Bus topic `xxx-xxx-xxx`.
+Next step is to publish the message (i.e. content of the file) in the Service Bus topic `topic-flighbooking`.
 To do that, we are using the `Service Bus` connector and `Send message to a queue or topic` action.
 
 <div class="task" data-title="Tasks">
 
 > Check the configuration of the `Send message to a queue or topic` action:   
->- Access the Logic App `xxx-xxx-xxx`. 
->- Open the workflow `wf_object_from_sa_to_sb` and the action `Send message`.
->- Make sure that Queue or Topic name correspons to `xxx-xxx-xxx` and that the Content section is filled with a variable corresponding to the content of the file from the previous step.
+>- Navigate to the Logic App `loahandsonlabinoday01`. 
+>- In the left-hand menu, click on `Workflows` from the `Workflows` section.
+>- Open the workflow `wf_flightbooking_from_sa_to_sb`.
+>- In the left-hand menu, click on `Designer` from the `Developer` section.
+>- Click on the action `Send message`.
+>- Make sure that the Container Name is set to `input` and that the Blob Name is set to `last(split(items('For_each')['subject'], '/'))`.
 
 </div>
 
@@ -252,12 +272,14 @@ As the Service Bus connection configuration is already done, we will focus on th
 <div class="task" data-title="Tasks">
 
 > Create and configure the Service Bus trigger : 
->- Access the Logic App `xxx-xxx-xxx`. 
->- Open the workflow `wf_object_from_sb_to_cdb`.
+>- Navigate to the Logic App `loahandsonlabinoday01`. 
+>- In the left-hand menu, click on `Workflows` from the `Workflows` section.
+>- Open the workflow `wf_flightbooking_from_sb_to_cdb`.
+>- In the left-hand menu, click on `Designer` from the `Developer` section.
 >- Click on the `Add a trigger` button.
 >- In the triggers list search for `Service Bus` and select the `When messages are available in a topic` trigger.
->- In the Topic Name dropdown list, select the `xxx-xxx-xxx` topic. 
->- In the Subscription Name dropdown list, select the `xxx-xxx-cdb` topic.
+>- In the Topic Name dropdown list, select the `topic-flighbooking` topic. 
+>- In the Subscription Name dropdown list, select the `sub-flighbooking-cdb` subscription.
 >- Once everything is set, click on the Save button on the top left corner.
 
 </div>
@@ -316,8 +338,10 @@ We will use a `Compose` action with a function to transform the JSON message int
 <div class="task" data-title="Tasks">
 
 > Configure a `Compose` action with a function to transform JSON into XML:
->- Open the Logic App `xxx-xxx-xxx`.
->- Access the workflow `xxx-xxx-xxx`.
+>- Navigate to the Logic App `loahandsonlabinoday01`. 
+>- In the left-hand menu, click on `Workflows` from the `Workflows` section.
+>- Open the workflow `wf_flightbooking_from_sb_to_cdb`.
+>- In the left-hand menu, click on `Designer` from the `Developer` section.
 >- Click on the `+` button, select `Add an action` and search for `Compose` from the list of actions.
 >- In the Inputs field of the Compose action, enter the following function: `xml(json(triggerBody()?['contentData']))`.
 >- Rename the action `JSON to XML`
@@ -334,8 +358,6 @@ We will then use a `Transform XML` action to transform the XML message into the 
 <div class="task" data-title="Tasks">
 
 > Configure a `Transform XML` action using an XSLT file:
->- Open the Logic App `xxx-xxx-xxx`.
->- Access the workflow `xxx-xxx-xxx`.
 >- Click on the `+` button, select `Add an action` and search for `Transform XML` from the list of actions.
 >- In the Content field, enter the following text: `outputs('JSON_to_XML')`.
 >- In the Map Source dropdown list, select `LogicApp`.
@@ -354,8 +376,6 @@ We will now use a `Compose` action with a function to transform the XML transfor
 <div class="task" data-title="Tasks">
 
 > Configure a `Compose` action with a function to transform JSON into XML:
->- Open the Logic App `xxx-xxx-xxx`.
->- Access the workflow `xxx-xxx-xxx`.
 >- Click on the `+` button, select `Add an action` and search for `Compose` from the list of actions.
 >- In the Inputs field of the Compose action, enter the following function: `json(body('Transform_XML'))`.
 >- Rename the action `XML to JSON`
@@ -383,7 +403,7 @@ We will now see how to retrieve this key for integration into our configuration.
 
 > Retrieve the Cosmos DB Shared Access Key:
 
->- Navigate to the Cosmos DB account `xxx-xxx-xxx`.
+>- Navigate to the Cosmos DB account `cdbhandsonlabinoday01`.
 >- In the left-hand menu, click on Keys under the Settings section.
 >- In the Keys section, locate the Primary Key.
 >- Copy the Primary Key by clicking the copy icon next to it.
@@ -401,8 +421,10 @@ First, we need to configure the connection to our CosmosDB account.
 <div class="task" data-title="Tasks">
 
 > Configure the connection to CosmosDB for using the `Create or update document (V3)` connector:
->- Open the Logic App `xxx-xxx-xxx`.
->- Access the workflow `xxx-xxx-xxx`.
+>- Navigate to the Logic App `loahandsonlabinoday01`. 
+>- In the left-hand menu, click on `Workflows` from the `Workflows` section.
+>- Open the workflow `wf_flightbooking_from_sb_to_cdb`.
+>- In the left-hand menu, click on `Designer` from the `Developer` section.
 >- Click on the `+` button, select `Add an action` and search for `Cosmos DB`. 
 >- Select `Create or update document (V3)`
 >- Set the connection with your Cosmos Db Instance: Select the Access Key authentication type and set the primary key that you retrieved in the previous step
@@ -454,13 +476,13 @@ We are now ready to test our workflow.
 
 ### 🚀 Check the message stored in the CosmosDB
 
-First, let's upload a new file to the `xxx-xxx-xxx` container of the `xxx-xxx-xxx` Storage Account to simulate a booking. 
+First, let's upload a new file to the `flightbookings` container of the `cdbhandsonlabinoday01` Storage Account to simulate a booking. 
 You can download the JSON file from here: [Download file](assets/sample_flightbooking.json)
 
 <div class="task" data-title="Tasks">
 
-> Upload the file in the Storage Account and check the message in CosmosDB : 
->- Navigate to the Storage Account `xxx-xxx-xxx`.
+> Upload the file in the Storage Account : 
+>- Navigate to the Storage Account `sahandsonlabinoday01`.
 >- In the left-hand menu, click on `Storage browser` and select `Blob containers`.
 >- Click on the `input` container.
 >- From the top-menu bar, click on the `Upload` button, click on `Browse for files` and select the `sample_flightbooking.json` file from your Storage Explorer.
@@ -476,13 +498,14 @@ Then, let's XXX
 
 <div class="task" data-title="Tasks">
 
->- Navigate to the Cosmos DB account `xxx-xxx-xxx`.
+> Check the document created in CosmosDB 
+>- Navigate to the Cosmos DB account `cdbhandsonlabinoday01`.
 >- In the left-hand menu, click on `Data explorer` and click on `handsonlab` to open the database
->- Click on `bookings` to open the container
+>- Click on `flightbookings` to open the container
 >- Click on `Items` and select the first line
 
 </div>
 
-You should see your transformed message in the `bookings` container: 
+You should see your transformed message in the `flightbookings` container: 
 
 ![alt text](image-19.png)
