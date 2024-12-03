@@ -1,0 +1,50 @@
+{
+    "managedApiConnections": {
+        "azureeventgrid": {
+            "api": {
+                "id": "@{appsetting('subscription_Id')}/providers/Microsoft.Web/locations/westeurope/managedApis/azureeventgrid"
+            },
+            "authentication": {
+                "type": "ManagedServiceIdentity"
+            },
+            "connection": {
+                "id": "@{appsetting('subscription_Id')}/resourceGroups/@{appsetting('resourceGroup_Name')}/providers/Microsoft.Web/connections/azureeventgrid"
+            },
+            "connectionProperties": {
+                "authentication": {
+                    "audience": "https://management.core.windows.net/",
+                    "type": "ManagedServiceIdentity"
+                }
+            },
+            "connectionRuntimeUrl": "@appsetting('eventGrid_connectionRuntimeUrl')"
+        }
+    },
+    "serviceProviderConnections": {
+        "AzureBlob": {
+            "displayName": "co-sa-blobstorage",
+            "parameterSetName": "ManagedServiceIdentity",
+            "parameterValues": {
+                "authProvider": {
+                    "Type": "ManagedServiceIdentity"
+                },
+                "blobStorageEndpoint": "@appsetting('AzureBlob_blobStorageEndpoint')"
+            },
+            "serviceProvider": {
+                "id": "/serviceProviders/AzureBlob"
+            }
+        },
+        "serviceBus": {
+            "displayName": "co-sb-servicebus",
+            "parameterSetName": "ManagedServiceIdentity",
+            "parameterValues": {
+                "authProvider": {
+                    "Type": "ManagedServiceIdentity"
+                },
+                "fullyQualifiedNamespace": "@appsetting('serviceBus_fullyQualifiedNamespace')"
+            },
+            "serviceProvider": {
+                "id": "/serviceProviders/serviceBus"
+            }
+        }
+    }
+}
